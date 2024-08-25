@@ -2,5 +2,16 @@
 src = "src"
 out = "out"
 libs = ["lib"]
+olc = "0.8.25" # to use a specific local solc install set the path as `solc = "<path to solc>/solc"`
+
+remappings = ['@openzeppelin/contracts=lib/openzeppelin-contracts/contracts',
+'@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts']
+
+[rpc_endpoints]
+Holesky = "https://ethereum-holesky.publicnode.com"
+
+[etherscan]
+Holesky= { key = "bb56ea088446a0c2bb4f101dd8e46744ec793457df4b21726aa13f3128ce5350" }
+
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

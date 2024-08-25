@@ -1,66 +1,44 @@
-## Foundry
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+## DePetition Project
 
-Foundry consists of:
+Inspired by @ryanberckmans (twitter account): [deposit (stake) capital against a petition](https://twitter.com/ryanberckmans/status/1743675086144434402)
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+The goal is to build a canonical place for users to provide feedback to corporations and institutions by voting with their money. This project allows anyone to permissionlessly create petitions, and users can support the petitions by voting with their funds or without funds.
 
-## Documentation
+### Technical details
 
-https://book.getfoundry.sh/
+The DePetition project benefits from the [UUPS](https://docs.openzeppelin.com/contracts/5.x/api/proxy#UUPSUpgradeable) upgradeable pattern and contains three main contracts:
 
-## Usage
+- **Proxy contract**
+The proxy contract, which is 'DePetitionProxy.sol', is a home for strorage variables on the implementation contract and also handles the proxy logic.
 
-### Build
+- **Ledger contract**
+Our upgradeable contract is 'PetitionLedgerImpl', which is responsible for managing the funds that people send to support a petition, as well as upgrade logic.
+Notice that per upgrade, the 'VERSION' variable should be increased by one, and updating it with '2**64 - 1' will make the contract nonupgradeable forever.
 
-```shell
-$ forge build
-```
+- **Petition contract**
+The petition contract, which is 'Petition.sol', will be deployed by the ledger contract through the 'deployNewPetition function' at the same deterministic address with the same given salt on every EVM compatible chain.
+This contract has a third-party owner, which is the petition creator, which is different for each petition.
+Funds will be managed by the PetitionLedgerImpl contract, which the third party (petition owner) has no influence over.
 
-### Test
+### Test instractions
 
-```shell
-$ forge test
-```
+1. Go to the proxy address [here](https://holesky.etherscan.io/address/0x38200de4b4920ccddf4ac749ce88a1410f33aecd#writeProxyContract) invoke the deployNewPetition function (the argument salt is an arbitrary number). If it succeeds, it will return the address for your petition. You are the petition creator!
 
-### Format
+2. The petition supporter can support the petition you've created by sending funds via 'the'signWithToken' and 'signWithETH' functions, or no funds by simply invoking 'signWithNoFund'.
 
-```shell
-$ forge fmt
-```
+3. for signWithToken: mint [TST1](https://holesky.etherscan.io/address/0xaeeff661d58941115c4eced629cd70afe6ce5206#writeContract) and [TST2](https://holesky.etherscan.io/address/0x146c3816d390f4d57a0447bf608ca9a1e517c111#writeContract) as test token and approve [proxy address](https://holesky.etherscan.io/address/0x38200de4b4920ccddf4ac749ce88a1410f33aecd) the amount you want to support.
 
-### Gas Snapshots
+4. You can withdraw your funds through 'withdrawETH' and 'withdrawToken' whenever you want.
 
-```shell
-$ forge snapshot
-```
+### Conditions that the project should hold true eventually
 
-### Anvil
+- Users are able to deposit any token on any chain.
 
-```shell
-$ anvil
-```
+- Contract should be deployed on all chains at the same address.
 
-### Deploy
+- The frontend UI aggregates all petitions and token balances on any chain into a single petition system.
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
+### Further ideas
 
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+- featuring the contract with an NFT that has three levels (gold, silver, and bronze) based on how long the supporter staked the coin or how many coins.
